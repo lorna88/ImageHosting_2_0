@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload</title>
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this project -->
+    <link href="image_hosting.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <section class="jumbotron">
+    <div class="container">
+      <div class="py-5 text-center">
+        <h2 class="jumbotron-heading">Загрузка изображения</h2>
+        <p class="lead text-muted">Выберите файл на Вашем устройстве, загрузите его и получите ссылку на изображение. Ссылку можно использовать где угодно - в соцсетях, блогах или просто отправить друзьям.</p>
+      </div>
+      <div class="col-md-6 order-md-1">
+          <h4 class="jumbotron-heading mb-3">Выберите файл</h4>
+          <form id="form" method="post" action="/upload" enctype="multipart/form-data">
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <input class="form-control" type="file" id="file" name="image" accept=".jpeg,.jpg,.png,.gif" required>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-lg btn-block" type="submit" id="submit">Загрузить</button>
+          </form>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

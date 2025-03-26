@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload success</title>
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this project -->
+    <link href="image_hosting.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <section class="jumbotron text-center">
+      <div class="container">
+          <h2 class="jumbotron-heading mb-3">Изображение успешно загружено!</h2>
+          <div class="mb-3">
+            <a href="?">
+                <img src="?" class="img-thumbnail" alt="" width="200">
+            </a>
+          </div>
+          <a href="#" onclick="location.href='/upload'" class="btn btn-primary my-2 mb-3">Загрузить другое изображение</a>
+          <div class="row mb-3">
+            <label for="link">Ссылка:</label>
+            <input class="form-control" type="text" id="link" value="?" readonly>
+          </div>
+          <a href="#" onclick="location.href='/'" class="btn btn-secondary my-2 mb-3">Вернуться на главную</a>
+      </div>
+    </section>
+</body>
+</html>
