@@ -2,12 +2,13 @@
 import cgi
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
-from os import listdir
+from os import getenv, listdir
 from os.path import isfile, join, splitext
 from uuid import uuid4
 from PIL import Image
 
 from loguru import logger
+from DBManager import DBManager
 
 SERVER_ADDRESS = ('0.0.0.0', 8000)
 NGINX_ADDRESS = ('localhost', 8080)
@@ -16,6 +17,12 @@ ALLOWED_LENGTH = 5 * 1024 * 1024
 UPLOAD_DIR = 'images'
 
 logger.add('logs/app.log', format="[{time: YYYY-MM-DD HH:mm:ss}] | {level} | {message}")
+
+db = DBManager(getenv('POSTGRES_DB'),
+                getenv('POSTGRES_USER'),
+                getenv('POSTGRES_PASSWORD'),
+                getenv('POSTGRES_HOST'),
+                getenv('POSTGRES_PORT'))
 
 
 class ImageHostingHandler(BaseHTTPRequestHandler):
@@ -62,9 +69,21 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json; charset=utf-8')
         self.end_headers()
 
-        images = [f for f in listdir(UPLOAD_DIR) if isfile(join('images', f))]
+        # images = [f for f in listdir(UPLOAD_DIR) if isfile(join('images', f))]
+        images = db.get_images()
         logger.info(images)
-        self.wfile.write(json.dumps({'images': images}).encode('utf-8'))
+        images_json = []
+        for image in images:
+            image = {
+                'filename': image[1],
+                'original_name': image[2],
+                'size': image[3],
+                'upload_date': image[4].strftime('%Y-%m-%d %H:%M:%S'),
+                'file_type': image[5]
+            }
+            images_json.append(image)
+
+        self.wfile.write(json.dumps({'images': images_json}).encode('utf-8'))
 
     def get_upload(self):
         """Handle GET request to render the upload page."""
@@ -91,7 +110,7 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         )
 
         data = form['image'].file
-        _, ext = splitext(form['image'].filename)
+        orig_name, ext = splitext(form['image'].filename)
         ext = ext.lower()
 
         if ext not in ALLOWED_EXTENSIONS:
@@ -102,6 +121,9 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         image_id = uuid4()
         image_name = f'{image_id}{ext}'
         image_path = f'{UPLOAD_DIR}/{image_name}'
+        file_size_kb = round(content_length / 1024)
+        db.add_image(image_id, orig_name, file_size_kb, ext)
+        logger.info(f'File {image_name} uploaded')
         with open(image_path, 'wb') as f:
             f.write(data.read())
 
@@ -132,6 +154,8 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
 
 def run():
     """Run program"""
+    db.init_tables()
+    logger.info(db.get_images())
     # noinspection PyTypeChecker
     httpd = HTTPServer(SERVER_ADDRESS, ImageHostingHandler)
     # noinspection PyBroadException

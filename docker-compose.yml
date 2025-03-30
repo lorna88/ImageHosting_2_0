@@ -1,10 +1,15 @@
 networks:
   default:
 
+volumes:
+  image_hosting_data:
+
 services:
   app:
     container_name: app
     build: .
+    env_file:
+      - ./.env
     ports:
       - "8000:8000"
     volumes:
@@ -12,6 +17,8 @@ services:
       - ./images:/app/images
     networks:
       - default
+    depends_on:
+      - db
 
   nginx:
     container_name: nginx
@@ -28,3 +35,16 @@ services:
       - default
     depends_on:
       - app
+
+  db:
+    image: postgres:latest
+    container_name: db
+    env_file:
+      - ./.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - image_hosting_data:/var/lib/postgresql/data
+    networks:
+      - default
+    restart: always
