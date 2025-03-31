@@ -2,8 +2,8 @@
 import cgi
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
-from os import getenv, listdir
-from os.path import isfile, join, splitext
+from os import getenv, listdir, remove
+from os.path import isfile, join, splitext, exists
 from uuid import uuid4
 from PIL import Image
 
@@ -39,6 +39,9 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         self.post_routes = {
             '/upload': self.post_upload,
         }
+        self.delete_routes = {
+            '/delete': self.delete_image,
+        }
         super().__init__(request, client_address, server)
 
     def do_GET(self):
@@ -55,6 +58,13 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
             self.post_routes[self.path]()
         else:
             logger.warning(f'POST 405 {self.path}')
+            self.send_error(405, 'Method Not Allowed')
+
+    def do_DELETE(self):
+        if self.path in self.delete_routes:
+            self.delete_routes[self.path]()
+        else:
+            logger.warning(f'DELETE 405 {self.path}')
             self.send_error(405, 'Method Not Allowed')
 
     def end_headers(self):
@@ -150,6 +160,21 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
         self.wfile.write(html_strings.encode('utf-8'))
+
+    def delete_image(self):
+        image_id, ext = splitext(self.headers.get('Filename'))
+        if not image_id:
+            logger.warning('Filename header not found')
+            self.send_error(404, 'Filename header not found')
+            return
+        db.delete_image(image_id)
+        image_path = f'{UPLOAD_DIR}/{image_id}{ext}'
+        if not exists(image_path):
+            logger.warning('Image not found')
+            self.send_error(404, 'Image not found')
+        remove(image_path)
+        logger.info(f'Delete success: {image_path}')
+        self.wfile.write(json.dumps({'Success': 'Image deleted'}).encode('utf-8'))
 
 
 def run():
