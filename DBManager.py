@@ -1,8 +1,18 @@
 import psycopg
 from loguru import logger
 
-class DBManager:
-    def __init__(self, dbname: str, user: str, password: str, host: str, port: int):
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+class DBManager(metaclass=SingletonMeta):
+    def __init__(self, dbname: str = None, user: str = None, password: str = None, host: str = None, port: int = None):
         self.dbname = dbname
         self.user = user
         self.password = password
