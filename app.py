@@ -10,6 +10,7 @@ from PIL import Image
 
 from loguru import logger
 from DBManager import DBManager
+from Router import Router
 
 SERVER_ADDRESS = ('0.0.0.0', 8000)
 NGINX_ADDRESS = ('localhost', 8080)
@@ -33,40 +34,38 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
 
     def __init__(self, request, client_address, server):
         """Initialize the handler with routing for GET and POST requests."""
-        self.get_routes = {
-            '/upload': self.get_upload,
-            '/api/images/': self.get_images,
-        }
-        self.post_routes = {
-            '/upload': self.post_upload,
-        }
-        self.delete_routes = {
-            '/delete': self.delete_image,
-        }
+        self.default_response = lambda: self.send_error(404, 'Method not allowed')
+        self.router = Router()
         super().__init__(request, client_address, server)
 
     def do_GET(self):
         """Handle GET requests by routing to the appropriate handler or returning a 404 error."""
-        if self.path in self.get_routes:
-            self.get_routes[self.path]()
+        logger.info(f'GET {self.path}')
+        handler = self.router.resolve('GET', self.path)
+        if handler:
+            handler(self)
         else:
-            logger.warning(f'GET 404 {self.path}')
-            self.send_error(404, 'Not Found')
+            logger.warning(f'No handler for GET {self.path}')
+            self.default_response()
 
     def do_POST(self):
         """Handle POST requests by routing to the appropriate handler or returning a 405 error."""
-        if self.path in self.post_routes:
-            self.post_routes[self.path]()
+        logger.info(f'POST {self.path}')
+        handler = self.router.resolve('POST', self.path)
+        if handler:
+            handler(self)
         else:
-            logger.warning(f'POST 405 {self.path}')
-            self.send_error(405, 'Method Not Allowed')
+            logger.warning(f'No handler for POST {self.path}')
+            self.default_response()
 
     def do_DELETE(self):
-        if self.path in self.delete_routes:
-            self.delete_routes[self.path]()
+        logger.info(f'DELETE {self.path}')
+        handler = self.router.resolve('DELETE', self.path)
+        if handler:
+            handler(self)
         else:
-            logger.warning(f'DELETE 405 {self.path}')
-            self.send_error(405, 'Method Not Allowed')
+            logger.warning(f'No handler for DELETE {self.path}')
+            self.default_response()
 
     def end_headers(self):
         """Add custom headers before ending the HTTP response headers."""
@@ -189,12 +188,18 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps({'Success': 'Image deleted'}).encode('utf-8'))
 
 
-def run():
+def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     """Run program"""
     db.init_tables()
+
+    router = Router()
+    router.add_route('GET', r'^\/upload$', handler_class.get_upload)
+    router.add_route('GET', r'^\/api\/images\/$', handler_class.get_images)
+    router.add_route('POST', r'^\/upload$', handler_class.post_upload)
+    router.add_route('DELETE', r'^\/delete\/(.*)$', handler_class.delete_image)
     logger.info(db.get_images())
     # noinspection PyTypeChecker
-    httpd = HTTPServer(SERVER_ADDRESS, ImageHostingHandler)
+    httpd = server_class(SERVER_ADDRESS, handler_class)
     # noinspection PyBroadException
     try:
         logger.info(f'Serving at http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}')

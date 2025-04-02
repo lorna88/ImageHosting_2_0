@@ -48,7 +48,7 @@ function setImages(images) {
 
     const deleteButton = document.createElement('button');
     deleteButton.onclick = () => {
-        fetch('/delete', {
+        fetch('/delete/', {
             method: 'DELETE',
             headers: {
                 'Filename': image_name
