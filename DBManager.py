@@ -1,6 +1,8 @@
 import psycopg
 from loguru import logger
 
+LIMIT = 12
+
 class SingletonMeta(type):
     _instances = {}
 
@@ -12,6 +14,7 @@ class SingletonMeta(type):
 
 
 class DBManager(metaclass=SingletonMeta):
+
     def __init__(self, dbname: str = None, user: str = None, password: str = None, host: str = None, port: int = None):
         self.dbname = dbname
         self.user = user
@@ -40,9 +43,11 @@ class DBManager(metaclass=SingletonMeta):
         self.execute_file('init_tables.sql')
         self.conn.commit()
 
-    def get_images(self):
+    def get_images(self, page=1):
+        offset = (page - 1) * LIMIT
+        logger.info(f'Try to get images with offset {offset}')
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM images")
+            cursor.execute("SELECT * FROM images LIMIT %s OFFSET %s", (LIMIT, offset,))
             return cursor.fetchall()
 
     def execute(self, query: str):

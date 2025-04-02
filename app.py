@@ -4,6 +4,7 @@ import json
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 from os import getenv, listdir, remove
 from os.path import isfile, join, splitext, exists
+from urllib.parse import parse_qs
 from uuid import uuid4
 from PIL import Image
 
@@ -34,7 +35,7 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         """Initialize the handler with routing for GET and POST requests."""
         self.get_routes = {
             '/upload': self.get_upload,
-            '/images': self.get_images,
+            '/api/images/': self.get_images,
         }
         self.post_routes = {
             '/upload': self.post_upload,
@@ -72,15 +73,23 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         SimpleHTTPRequestHandler.end_headers(self)
 
+    def send_json(self, response: dict, code: int = 200,
+                  headers: dict = None) -> None:
+        self.send_response(code)
+        self.send_header('Content-type', 'application/json')
+        if headers:
+            for header, value in headers.items():
+                self.send_header(header, value)
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode('utf-8'))
+
     def get_images(self):
         """Handle GET request to retrieve the list of image filenames in JSON format."""
-        logger.info(f'GET {self.path}')
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json; charset=utf-8')
-        self.end_headers()
+        logger.info(self.headers.get('Query-String'))
+        query_components = parse_qs(self.headers.get('Query-String'))
+        page = int(query_components.get('page', ['1'])[0])
+        images = db.get_images(page)
 
-        # images = [f for f in listdir(UPLOAD_DIR) if isfile(join('images', f))]
-        images = db.get_images()
         logger.info(images)
         images_json = []
         for image in images:
@@ -93,7 +102,9 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
             }
             images_json.append(image)
 
-        self.wfile.write(json.dumps({'images': images_json}).encode('utf-8'))
+        self.send_json({
+            'images': images_json
+        })
 
     def get_upload(self):
         """Handle GET request to render the upload page."""
@@ -163,6 +174,7 @@ class ImageHostingHandler(BaseHTTPRequestHandler):
 
     def delete_image(self):
         image_id, ext = splitext(self.headers.get('Filename'))
+        logger.info(f'Try to delete image {image_id}')
         if not image_id:
             logger.warning('Filename header not found')
             self.send_error(404, 'Filename header not found')
