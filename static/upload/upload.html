@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>Upload</title>
     <!-- Bootstrap core CSS -->
-    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this project -->
-    <link href="image_hosting.css" rel="stylesheet">
+    <link href="../image_hosting.css" rel="stylesheet">
 </head>
 <body class="bg-light">
   <section class="jumbotron">
@@ -17,7 +17,7 @@
       </div>
       <div class="col-md-6 order-md-1">
           <h4 class="jumbotron-heading mb-3">Выберите файл</h4>
-          <form id="form" method="post" action="/upload" enctype="multipart/form-data">
+          <form id="form" method="post" action="/api/upload/" enctype="multipart/form-data">
             <div class="row">
               <div class="col-md-12 mb-3">
                 <input class="form-control" type="file" id="file" name="image" accept=".jpeg,.jpg,.png,.gif" required>

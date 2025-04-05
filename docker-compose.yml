@@ -7,7 +7,7 @@ volumes:
 services:
   app:
     container_name: app
-    build: .
+    build: ./app
     env_file:
       - ./.env
     ports:
@@ -15,6 +15,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./images:/app/images
+      - ./static:/app/static
     networks:
       - default
     depends_on:
