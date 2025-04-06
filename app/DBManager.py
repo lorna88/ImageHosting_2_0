@@ -39,7 +39,7 @@ class DBManager(metaclass=SingletonMeta):
         offset = (page - 1) * LIMIT
         logger.info(f'Try to get images with offset {offset}')
         with self.conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM images LIMIT %s OFFSET %s", (LIMIT, offset,))
+            cursor.execute("SELECT * FROM images ORDER BY upload_time DESC LIMIT %s OFFSET %s", (LIMIT, offset,))
             return cursor.fetchall()
 
     def execute(self, query: str):

@@ -1,6 +1,7 @@
 """Frameworkless backend for image hosting"""
 import os
 from http.server import HTTPServer
+from routes import register_routes
 from settings import LOG_PATH, LOG_FILE
 from settings import SERVER_ADDRESS
 
@@ -26,9 +27,7 @@ def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     db.init_tables()
 
     router = Router()
-    router.add_route('GET', '/api/images/', handler_class.get_images)
-    router.add_route('POST', '/upload/', handler_class.post_upload)
-    router.add_route('DELETE', '/delete/<image_id>', handler_class.delete_image)
+    register_routes(router, handler_class)
     # noinspection PyTypeChecker
     httpd = server_class(SERVER_ADDRESS, handler_class)
     # noinspection PyBroadException

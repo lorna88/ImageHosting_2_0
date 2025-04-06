@@ -72,12 +72,20 @@ function loadImages(page) {
   fetch(`/api/images/?page=${page}`)
     .then(response => response.json())
     .then(data => {
-      imagesContainer.innerHTML = '';
-      setImages(data.images);
-      document.getElementById('nextPage').disabled = data.images.length < imagesPerPage;
-      document.getElementById('prevPage').disabled = page === 1;
-      document.getElementById('currentPage').textContent = page;
-      currentPage = page;
+      if (data.images.length == 0) {
+          document.querySelector('nav').style.display = 'none';
+          document.querySelector('.container').style.display = 'none';
+          const none_images = document.createElement('h1')
+          none_images.classList.add('text-center')
+          document.body.appendChild(none_images).textContent = 'Нет загруженных изображений';
+      } else {
+          imagesContainer.innerHTML = '';
+          setImages(data.images);
+          document.getElementById('nextPage').disabled = data.images.length < imagesPerPage;
+          document.getElementById('prevPage').disabled = page === 1;
+          document.getElementById('currentPage').textContent = page;
+          currentPage = page;
+      }
     })
     .catch(error => console.error(error));
 }
