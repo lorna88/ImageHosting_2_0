@@ -94,8 +94,8 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
 
         # paste links on image into html document
         str_for_replace = {
-            'href="?"': f'href="{image_path}"',
-            'src="?"': f'src="{image_path}"',
+            'href="?"': f'href="/{image_path}"',
+            'src="?"': f'src="/{image_path}"',
             'value="?"': f'value="http://{NGINX_ADDRESS[0]}:{NGINX_ADDRESS[1]}/{image_path}"'
         }
         html_strings = open(f'{STATIC_PATH}success.html', 'r', encoding='utf-8').read()
