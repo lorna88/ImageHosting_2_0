@@ -31,9 +31,9 @@ class AdvancedHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """Handle GET requests by routing to the appropriate handler or returning a 404 error."""
         logger.info(f'GET {self.path}')
-        handler = self.router.resolve('GET', self.path)
+        handler, kwargs = self.router.resolve('GET', self.path)
         if handler:
-            handler(self)
+            handler(self, **kwargs)
         else:
             logger.warning(f'No handler for GET {self.path}')
             self.default_response()
@@ -41,18 +41,18 @@ class AdvancedHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handle POST requests by routing to the appropriate handler or returning a 405 error."""
         logger.info(f'POST {self.path}')
-        handler = self.router.resolve('POST', self.path)
+        handler, kwargs = self.router.resolve('POST', self.path)
         if handler:
-            handler(self)
+            handler(self, **kwargs)
         else:
             logger.warning(f'No handler for POST {self.path}')
             self.default_response()
 
     def do_DELETE(self):
         logger.info(f'DELETE {self.path}')
-        handler = self.router.resolve('DELETE', self.path)
+        handler, kwargs = self.router.resolve('DELETE', self.path)
         if handler:
-            handler(self)
+            handler(self, **kwargs)
         else:
             logger.warning(f'No handler for DELETE {self.path}')
             self.default_response()

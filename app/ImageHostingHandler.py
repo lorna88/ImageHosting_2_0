@@ -42,14 +42,6 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
             'images': images_json
         })
 
-    # def get_upload(self):
-    #     """Handle GET request to render the upload page."""
-    #     logger.info(f'GET {self.path}')
-    #     self.send_response(200)
-    #     self.send_header('Content-type', 'text/html; charset=utf-8')
-    #     self.end_headers()
-    #     self.wfile.write(open('upload.html', 'rb').read())
-
     def post_upload(self):
         """Handle POST request to upload an image."""
         logger.info(f'POST {self.path}')
@@ -108,19 +100,18 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(html_strings.encode('utf-8'))
 
-    def delete_image(self):
-        image_id, ext = os.path.splitext(self.headers.get('Filename'))
+    def delete_image(self, image_id):
         logger.info(f'Try to delete image {image_id}')
-        if not image_id:
+        filename, ext = os.path.splitext(image_id)
+        if not filename:
             logger.warning('Filename header not found')
             self.send_error(404, 'Filename header not found')
             return
-        self.db.delete_image(image_id)
-        image_path = f'{IMAGES_PATH}{image_id}{ext}'
+        self.db.delete_image(filename)
+        image_path = os.path.join(IMAGES_PATH, f'{filename}{ext}')
         if not os.path.exists(image_path):
             logger.warning('Image not found')
             self.send_error(404, 'Image not found')
         os.remove(image_path)
         logger.info(f'Delete success: {image_path}')
         self.send_json({'Success': 'Image deleted'})
-        # self.wfile.write(json.dumps({'Success': 'Image deleted'}).encode('utf-8'))
