@@ -1,16 +1,17 @@
 """Frameworkless backend for image hosting"""
 import os
 from http.server import HTTPServer
+
+from loguru import logger
+
+from DBManager import DBManager
+from ImageHostingHandler import ImageHostingHandler
+from Router import Router
 from routes import register_routes
 from settings import LOG_PATH, LOG_FILE
 from settings import SERVER_ADDRESS
 
-from loguru import logger
-from DBManager import DBManager
-from ImageHostingHandler import ImageHostingHandler
-from Router import Router
-
-logger.add('../logs/app.log', format="[{time: YYYY-MM-DD HH:mm:ss}] | {level} | {message}")
+# logger.add('../logs/app.log', format="[{time: YYYY-MM-DD HH:mm:ss}] | {level} | {message}")
 
 
 def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
@@ -27,18 +28,19 @@ def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     db.init_tables()
 
     router = Router()
+    # noinspection PyTypeChecker
     register_routes(router, handler_class)
     # noinspection PyTypeChecker
     httpd = server_class(SERVER_ADDRESS, handler_class)
+    logger.info(f'Serving at http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}')
     # noinspection PyBroadException
     try:
-        logger.info(f'Serving at http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}')
         httpd.serve_forever()
-    except Exception:
-        pass
+    except KeyboardInterrupt:
+        logger.warning('Keyboard interrupt received, exiting.')
+        httpd.server_close()
     finally:
         logger.info('Server stopped')
-        httpd.server_close()
 
 
 if __name__ == '__main__':

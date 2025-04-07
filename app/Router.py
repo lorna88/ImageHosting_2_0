@@ -1,4 +1,5 @@
 import re
+
 from loguru import logger
 
 from utils import SingletonMeta
@@ -6,6 +7,7 @@ from utils import SingletonMeta
 # logger.add('logs/router.log',
 #            format='[{time:YYYY-MM-DD HH:mm:ss}] {level}: {message}',
 #            level='INFO')
+
 
 class Router(metaclass=SingletonMeta):
     def __init__(self):
@@ -23,6 +25,7 @@ class Router(metaclass=SingletonMeta):
     def add_route(self, method: str, path: str, handler: callable) -> None:
         regex_pattern = self.convert_path_to_regex(path)
         pattern = re.compile(regex_pattern)
+
         self.routes[method][pattern] = handler
         logger.info(f'Added route: {method} {path} -> {handler.__name__}')
 

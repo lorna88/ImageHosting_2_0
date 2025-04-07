@@ -19,14 +19,14 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
         self.db = DBManager()
         super().__init__(request, client_address, server)
 
-    def get_images(self):
+    def get_images(self) -> None:
         """Handle GET request to retrieve the list of image filenames in JSON format."""
         logger.info(self.headers.get('Query-String'))
         query_components = parse_qs(self.headers.get('Query-String'))
         page = int(query_components.get('page', ['1'])[0])
+        if page < 1:
+            page = 1
         images = self.db.get_images(page)
-
-        logger.info(images)
         images_json = []
         for image in images:
             image = {
@@ -42,13 +42,12 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
             'images': images_json
         })
 
-    def post_upload(self):
+    def post_upload(self) -> None:
         """Handle POST request to upload an image."""
-        logger.info(f'POST {self.path}')
-        content_length = int(self.headers.get('Content-Length'))
-        if content_length > MAX_FILE_SIZE:
-            logger.error('Payload Too Large')
-            self.send_error(413, 'Payload Too Large')
+        length = int(self.headers.get('Content-Length'))
+        if length > MAX_FILE_SIZE:
+            logger.error('File Too Large')
+            self.send_error(413, 'File Too Large')
             return
 
         # noinspection PyTypeChecker
@@ -57,24 +56,23 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
             headers=self.headers,
             environ={'REQUEST_METHOD': 'POST'}
         )
-
+        #
         data = form['image'].file
         orig_name, ext = os.path.splitext(form['image'].filename)
         ext = ext.lower()
-
         if ext not in ALLOWED_EXTENSIONS:
-            logger.error('Unsupported file extension')
-            self.send_error(400, 'Unsupported file Extension')
+            logger.error('File type not allowed')
+            self.send_error(400, 'File type not allowed')
             return
 
-        image_id = uuid4()
-        image_name = f'{image_id}{ext}'
-        image_path = f'{IMAGES_PATH}{image_name}'
-        file_size_kb = round(content_length / 1024)
-        self.db.add_image(image_id, orig_name, file_size_kb, ext)
+        filename = uuid4()
+        image_name = f'{filename}{ext}'
+        image_path = os.path.join(IMAGES_PATH, image_name)
+        file_size_kb = round(length / 1024)
+        self.db.add_image(filename, orig_name, file_size_kb, ext)
         logger.info(f'File {image_name} uploaded')
-        with open(image_path, 'wb') as f:
-            f.write(data.read())
+        with open(image_path, 'wb') as file:
+            file.write(data.read())
 
         try:
             im = Image.open(image_path)
@@ -90,17 +88,13 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
             'src="?"': f'src="/{image_path}"',
             'value="?"': f'value="http://{NGINX_ADDRESS[0]}:{NGINX_ADDRESS[1]}/{image_path}"'
         }
-        html_strings = open(f'{STATIC_PATH}success.html', 'r', encoding='utf-8').read()
+        html_strings = open(os.path.join(STATIC_PATH, 'success.html'), 'r', encoding='utf-8').read()
         for old, new in str_for_replace.items():
             html_strings = html_strings.replace(old, new)
 
-        logger.info(f'Upload success: {image_name}')
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html; charset=utf-8')
-        self.end_headers()
-        self.wfile.write(html_strings.encode('utf-8'))
+        self.send_html(html_strings)
 
-    def delete_image(self, image_id):
+    def delete_image(self, image_id: str) -> None:
         logger.info(f'Try to delete image {image_id}')
         filename, ext = os.path.splitext(image_id)
         if not filename:
@@ -113,5 +107,4 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
             logger.warning('Image not found')
             self.send_error(404, 'Image not found')
         os.remove(image_path)
-        logger.info(f'Delete success: {image_path}')
         self.send_json({'Success': 'Image deleted'})

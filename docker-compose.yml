@@ -25,6 +25,7 @@ services:
     container_name: nginx
     command: nginx -g "daemon off;"
     image: nginx:latest
+    restart: always
     ports:
       - "8080:80"
     volumes:

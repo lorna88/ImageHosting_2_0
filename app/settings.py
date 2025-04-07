@@ -6,4 +6,4 @@ ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']
 MAX_FILE_SIZE = 5 * 1024 * 1024
 LOG_PATH = 'logs/'
 LOG_FILE = 'app.log'
-ERROR_FILE = 'upload_failed.html'
+IMAGES_LIMIT = 12
