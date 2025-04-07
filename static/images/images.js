@@ -40,11 +40,22 @@ function setImages(images) {
     card_body.classList.add('card-body');
     card.appendChild(card_body)
 
+    const row = document.createElement('div');
+    row.classList.add('row');
+    const colUrl = document.createElement('div');
+    colUrl.classList.add('col-9', 'text-truncate');
+    const colDelete = document.createElement('div');
+    colDelete.classList.add('col');
+    row.appendChild(colUrl)
+    row.appendChild(colDelete)
+    card_body.appendChild(row)
+
     const link = document.createElement('a');
     link.classList.add('card-link');
     link.href = `/images/${fullFilename}`;
     link.textContent = image.original_name + image.file_type;
-    card_body.appendChild(link);
+    link.title = image.original_name + image.file_type;
+    colUrl.appendChild(link);
 
     const deleteButton = document.createElement('button');
     deleteButton.onclick = () => {
@@ -54,7 +65,7 @@ function setImages(images) {
     }
     deleteButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16"> <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/></svg>';
     deleteButton.classList.add('delete-btn', 'ml-2', 'd-inline-flex');
-    card_body.appendChild(deleteButton);
+    colDelete.appendChild(deleteButton);
 
     const size = document.createElement('p');
     size.classList.add('card-text');
