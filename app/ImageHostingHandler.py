@@ -9,7 +9,8 @@ from loguru import logger
 from AdvancedHandler import AdvancedHTTPRequestHandler
 from DBManager import DBManager
 from settings import IMAGES_PATH, \
-    ALLOWED_EXTENSIONS, MAX_FILE_SIZE, NGINX_ADDRESS, STATIC_PATH
+    ALLOWED_EXTENSIONS, MAX_FILE_SIZE, NGINX_ADDRESS, STATIC_PATH,\
+    IMAGES_LIMIT
 
 
 class ImageHostingHandler(AdvancedHTTPRequestHandler):
@@ -37,10 +38,12 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
                 'file_type': image[5]
             }
             images_json.append(image)
+        images_json = {'images': images_json}
 
-        self.send_json({
-            'images': images_json
-        })
+        images_count = self.db.get_images_count()
+        images_json['last_page'] = (images_count - 1) // IMAGES_LIMIT + 1 == page
+
+        self.send_json(images_json)
 
     def post_upload(self) -> None:
         """Handle POST request to upload an image."""

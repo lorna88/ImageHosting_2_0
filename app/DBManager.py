@@ -28,10 +28,10 @@ class DBManager(metaclass=SingletonMeta):
         except psycopg.Error as e:
             logger.error(f"DB connection error: {e}")
 
-    def close(self):
+    def close(self) -> None:
         self.conn.close()
 
-    def init_tables(self):
+    def init_tables(self) -> None:
         self.execute_file('init_tables.sql')
         logger.info('Tables initialized')
         self.conn.commit()
@@ -43,14 +43,14 @@ class DBManager(metaclass=SingletonMeta):
             cursor.execute("SELECT * FROM images ORDER BY upload_time DESC LIMIT %s OFFSET %s", (IMAGES_LIMIT, offset))
             return cursor.fetchall()
 
-    def execute(self, query: str):
+    def execute(self, query: str) -> None:
         try:
             with self.conn.cursor() as cursor:
                 cursor.execute(query)
         except psycopg.Error as e:
             logger.error(f"Error executing query: {e}")
 
-    def execute_file(self, filename: str):
+    def execute_file(self, filename: str) -> None:
         try:
             self.execute(open(f'./{filename}').read())
         except FileNotFoundError:
@@ -80,3 +80,9 @@ class DBManager(metaclass=SingletonMeta):
             self.conn.commit()
         except psycopg.Error as e:
             logger.error(f"Error deleting image: {e}")
+
+    def get_images_count(self) -> int:
+        logger.info(f'Try to get images count')
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM images")
+            return cursor.fetchone()[0]

@@ -81,7 +81,7 @@ function loadImages(page) {
       } else {
           imagesContainer.innerHTML = '';
           setImages(data.images);
-          document.getElementById('nextPage').disabled = data.images.length < imagesPerPage;
+          document.getElementById('nextPage').disabled = data.last_page;
           document.getElementById('prevPage').disabled = page === 1;
           document.getElementById('currentPage').textContent = page;
           currentPage = page;
