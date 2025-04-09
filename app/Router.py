@@ -20,6 +20,7 @@ class Router(metaclass=SingletonMeta):
     @staticmethod
     def convert_path_to_regex(path: str):
         regex = re.sub(r'<(\w+)>', r'(?P<\1>[^/]+)', path)
+        regex = re.sub(r'\?(\w+)=\?', r'\?\1=(?P<\1>[0-9a-z]+)', regex)
         return f'^{regex}$'
 
     def add_route(self, method: str, path: str, handler: callable) -> None:

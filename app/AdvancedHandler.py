@@ -1,5 +1,5 @@
 import json
-from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 
 from loguru import logger
 
@@ -12,11 +12,6 @@ class AdvancedHTTPRequestHandler(BaseHTTPRequestHandler):
         self.default_response = lambda: self.send_error(404, 'Not found')
         self.router = Router()
         super().__init__(request, client_address, server)
-
-    # def end_headers(self):
-    #     """Add custom headers before ending the HTTP response headers."""
-    #     self.send_header('Access-Control-Allow-Origin', '*')
-    #     SimpleHTTPRequestHandler.end_headers(self)
 
     def send_html(self, data: str,
                   code: int = 200,

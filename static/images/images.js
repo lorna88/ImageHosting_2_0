@@ -83,6 +83,7 @@ function loadImages(page) {
   fetch(`/api/images/?page=${page}`)
     .then(response => response.json())
     .then(data => {
+      page = data.page;
       if (data.images.length == 0) {
           document.querySelector('nav').style.display = 'none';
           document.querySelector('.container').style.display = 'none';
@@ -97,6 +98,7 @@ function loadImages(page) {
           document.getElementById('currentPage').textContent = page;
           currentPage = page;
       }
+      history.pushState(null, null, `/images/?page=${page}`);
     })
     .catch(error => console.error(error));
 }
@@ -112,4 +114,6 @@ document.getElementById('nextPage').addEventListener('click', () => {
   loadImages(currentPage + 1);
 });
 
-loadImages(1);
+let params = new URLSearchParams(document.location.search);
+let page = params.get('page') ?? 1;
+loadImages(page);

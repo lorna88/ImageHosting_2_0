@@ -1,6 +1,5 @@
 import os
 import cgi
-from urllib.parse import parse_qs
 from uuid import uuid4
 from PIL import Image
 
@@ -20,13 +19,16 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
         self.db = DBManager()
         super().__init__(request, client_address, server)
 
-    def get_images(self) -> None:
+    def get_images(self, page: str) -> None:
         """Handle GET request to retrieve the list of image filenames in JSON format."""
-        logger.info(self.headers.get('Query-String'))
-        query_components = parse_qs(self.headers.get('Query-String'))
-        page = int(query_components.get('page', ['1'])[0])
+        page = int(page)
+        images_count = self.db.get_images_count()
+        last_page = (images_count - 1) // IMAGES_LIMIT + 1
         if page < 1:
             page = 1
+        if page > last_page:
+            page = last_page
+
         images = self.db.get_images(page)
         images_json = []
         for image in images:
@@ -38,11 +40,10 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
                 'file_type': image[5]
             }
             images_json.append(image)
-        images_json = {'images': images_json}
 
-        images_count = self.db.get_images_count()
-        images_json['last_page'] = (images_count - 1) // IMAGES_LIMIT + 1 == page
-
+        images_json = {'images': images_json,
+                       'page': page,
+                       'last_page': last_page == page}
         self.send_json(images_json)
 
     def post_upload(self) -> None:
