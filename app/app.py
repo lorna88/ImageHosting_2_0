@@ -12,9 +12,7 @@ from routes import register_routes
 from settings import LOG_PATH, LOG_FILE
 from settings import SERVER_ADDRESS
 
-# logger.add('../logs/app.log', format="[{time: YYYY-MM-DD HH:mm:ss}] | {level} | {message}")
-
-
+# noinspection PyTypeChecker
 def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     """Run program"""
     load_dotenv()
@@ -30,9 +28,8 @@ def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     db.init_tables()
 
     router = Router()
-    # noinspection PyTypeChecker
     register_routes(router, handler_class)
-    # noinspection PyTypeChecker
+
     httpd = server_class(SERVER_ADDRESS, handler_class)
     logger.info(f'Serving at http://{SERVER_ADDRESS[0]}:{SERVER_ADDRESS[1]}')
     # noinspection PyBroadException

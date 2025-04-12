@@ -59,6 +59,7 @@ class DBManager(metaclass=SingletonMeta):
     def add_image(self, filename: str, original_name: str, length: int, ext: str) -> None:
         logger.info(f'Try to add image {filename}')
         with self.conn.cursor() as cursor:
+            # noinspection PyTypeChecker
             cursor.execute(
                 "INSERT INTO images "
                 "(filename, original_name, size, file_type)"

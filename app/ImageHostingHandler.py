@@ -46,6 +46,7 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
                        'last_page': last_page == page}
         self.send_json(images_json)
 
+    # noinspection PyTypeChecker
     def post_upload(self) -> None:
         """Handle POST request to upload an image."""
         length = int(self.headers.get('Content-Length'))
@@ -54,7 +55,6 @@ class ImageHostingHandler(AdvancedHTTPRequestHandler):
             self.send_error(413, 'File Too Large')
             return
 
-        # noinspection PyTypeChecker
         form = cgi.FieldStorage(
             fp=self.rfile,
             headers=self.headers,
