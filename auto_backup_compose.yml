@@ -19,4 +19,4 @@ services:
       - BACKUP_ON_START=TRUE
       - BACKUP_KEEP_DAYS=7
     networks:
-      - default
+      - back-network

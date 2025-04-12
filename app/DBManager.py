@@ -82,7 +82,6 @@ class DBManager(metaclass=SingletonMeta):
             logger.error(f"Error deleting image: {e}")
 
     def get_images_count(self) -> int:
-        logger.info(f'Try to get images count')
         with self.conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM images")
             return cursor.fetchone()[0]

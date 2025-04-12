@@ -4,10 +4,6 @@ from loguru import logger
 
 from utils import SingletonMeta
 
-# logger.add('logs/router.log',
-#            format='[{time:YYYY-MM-DD HH:mm:ss}] {level}: {message}',
-#            level='INFO')
-
 
 class Router(metaclass=SingletonMeta):
     def __init__(self):

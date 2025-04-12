@@ -2,6 +2,7 @@
 import os
 from http.server import HTTPServer
 
+from dotenv import load_dotenv
 from loguru import logger
 
 from DBManager import DBManager
@@ -16,6 +17,7 @@ from settings import SERVER_ADDRESS
 
 def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     """Run program"""
+    load_dotenv()
     logger.add(os.path.join(LOG_PATH, LOG_FILE),
                format='[{time:YYYY-MM-DD HH:mm:ss}] {level}: {message}',
                level='INFO')
