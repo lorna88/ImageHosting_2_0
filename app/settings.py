@@ -1,3 +1,4 @@
+"""Some important constants"""
 SERVER_ADDRESS = ('0.0.0.0', 8000)
 NGINX_ADDRESS = ('localhost', 8080)
 STATIC_PATH = 'static/'

@@ -4,7 +4,7 @@ BACKUP_DIR=${BACKUP_DIR:='backups'}
 PG_USER=${PG_USER:='postgres'}
 DB_NAME=${DB_NAME:='images_db'}
 NOW=$(date '+%Y-%m-%d %H:%M:%S')
-FILE_NAME=backup_$NOW.sql
+FILE_NAME=backup_${NOW//:/}.sql
 LOG_FILE='logs/app.log'
 
 mkdir -p "$BACKUP_DIR"

@@ -12,6 +12,7 @@ from routes import register_routes
 from settings import LOG_PATH, LOG_FILE
 from settings import SERVER_ADDRESS
 
+
 # noinspection PyTypeChecker
 def run(server_class=HTTPServer, handler_class=ImageHostingHandler):
     """Run program"""
