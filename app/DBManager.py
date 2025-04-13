@@ -96,7 +96,7 @@ class DBManager(metaclass=SingletonMeta):
         logger.info(f'Try to delete image {filename}')
         try:
             with self.conn.cursor() as cursor:
-                cursor.execute("DELETE FROM image WHERE filename = %s", (filename,))
+                cursor.execute("DELETE FROM images WHERE filename = %s", (filename,))
             self.conn.commit()
             return True
         except psycopg.Error as e:
